@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge;chrome=1' />
+    <title>Blog - Developing on Windows</title>
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml" />
+    <link href="/stylesheets/all.css" rel="stylesheet" type="text/css" />
+    <style>
+    .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #151515;
+  background-color: #ac4142;
+}
+.highlight .c, .highlight .cd, .highlight .cm, .highlight .c1, .highlight .cs {
+  color: #505050;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #d0d0d0;
+}
+.highlight .p, .highlight .pi {
+  color: #d0d0d0;
+}
+.highlight .gi {
+  color: #90a959;
+}
+.highlight .gd {
+  color: #ac4142;
+}
+.highlight .gh {
+  color: #6a9fb5;
+  background-color: #151515;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #aa759f;
+}
+.highlight .kc {
+  color: #d28445;
+}
+.highlight .kt {
+  color: #d28445;
+}
+.highlight .kd {
+  color: #d28445;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #90a959;
+}
+.highlight .sr {
+  color: #75b5aa;
+}
+.highlight .si {
+  color: #8f5536;
+}
+.highlight .se {
+  color: #8f5536;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #6a9fb5;
+}
+.highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mb, .highlight .mx {
+  color: #90a959;
+}
+.highlight .ss {
+  color: #90a959;
+}
+    </style>
+  </head>
+  <body>
+
+    <div id="main" role="main">
+      <nav>
+  <ul>
+    <li>
+      <a class="blog-title" href="/">Code Blog</a>
+    </li>
+    <li>
+      Zsolt Fekete
+    </li>
+  </ul>
+</nav>
+
+
+      <p>I've been living in the unix terminal world for the last couple of years and I much prefer it over the gui bloat of visual studio or eclipse. I ended up with a nice windows machine and I really wanted to make it work.</p>
+
+<p>I went with a hybrid approach: use cygwin for a nice terminal with ssh and develop on a ubuntu vm.</p>
+
+<hr />
+
+<h5 id="development-environment-checklist">Development environment checklist:</h5>
+
+<p>Terminal</p>
+
+<pre class="highlight plaintext"><code>- 256 color tty
+- bash
+- tmux
+- ssh
+</code></pre>
+
+<p>Tools</p>
+
+<pre class="highlight plaintext"><code>- vim
+- git
+- ruby
+</code></pre>
+
+<p></p>
+
+<hr />
+
+<p>Cygwin was an obvious first solution but I soon found out that ruby, nodejs and vim had many issues that made it unusable for programming.</p>
+
+<p>For a while I ran vagrant and everything was fine until I ssh-ed into the windows machine and started up vagrant. It got confused and creating new vms in c:\windows\system32\config\systemprofile and after every restart it would forget the vm, proceeding to create new ones. Vagrant went in the trash.</p>
+
+<p>I kept cygwin for the terminal section of my checklist and ran virtualbox vm in headless mode for the tools.</p>
+
+<hr />
+
+<h5 id="cygwin">Cygwin</h5>
+
+<p>Download and install Cygwin with the recommended packages</p>
+
+<pre class="highlight plaintext"><code>https://cygwin.com/setup-x86.exe
+</code></pre>
+
+<p>Add cygwin\bin to path</p>
+
+<p>Create a shortcut for mintty (end with - for login shell)</p>
+
+<pre class="highlight plaintext"><code>C:\cygwin\bin\mintty.exe bash -
+</code></pre>
+
+<p>Get apt-cyg, the package manager.</p>
+
+<pre class="highlight plaintext"><code>lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg &gt; apt-cyg
+install apt-cyg /bin
+rm apt-cyg
+</code></pre>
+
+<p>Install essential packages</p>
+
+<pre class="highlight plaintext"><code>apt-cyg install wget git vim tmux
+</code></pre>
+
+<p>Set up SSH (run mintty.exe as administrator)</p>
+
+<pre class="highlight plaintext"><code>ssh-host-config -y
+</code></pre>
+
+<p>When prompted for CYGWIN enter <code>tty ntsec</code></p>
+
+<p>When prompted to run under default user say no and enter your current user</p>
+
+<pre class="highlight plaintext"><code>chmod 600 /etc/ssh_host*key
+net start sshd
+</code></pre>
+
+<p>Add windows firewall rule to accept connections on port 22.</p>
+
+<hr />
+
+<h5 id="vm">VM</h5>
+
+<p>Next let's set up our actual development environment in form of a ubuntu server vm.</p>
+
+<p>Install Virtualbox and download the latest ubuntu server iso.</p>
+
+<p>We want to access the vm from the network and also share the host's network and vpn. To do this, we'll add another network interface to our vm.</p>
+
+<pre class="highlight plaintext"><code>eth0 -&gt; NAT
+eth1 -&gt; bridge
+</code></pre>
+
+<p>Edit the network interfaces</p>
+
+<pre class="highlight plaintext"><code>sudo vim /etc/network/interfaces
+</code></pre>
+
+<p>Change the interfaces to something similar:</p>
+
+<pre class="highlight plaintext"><code>auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+      address 192.168.1.123
+      hetwork 192.168.1.0
+      netmask 255.255.255.0
+</code></pre>
+
+<p>Fix Grub timeout</p>
+
+<p>After a failed shutdown the vm gets stuck at the grub boot select screen. This is inconvenient when running the vm in headless mode.</p>
+
+<pre class="highlight plaintext"><code>sudo vim /etc/default/grub
+</code></pre>
+
+<p>Add this to the file:</p>
+
+<pre class="highlight plaintext"><code>GRUB_RECORDFAIL_TIMEOUT=2
+</code></pre>
+
+<p>Update grub</p>
+
+<pre class="highlight plaintext"><code>sudo update-grub
+</code></pre>
+
+<p>Create two bat files to start and stop headless vm with VBoxManage. (trusty64 is the name of the vm)</p>
+
+<p>start-vm.bat</p>
+
+<pre class="highlight plaintext"><code>VBoxManage startvm trusty64 --type headless
+</code></pre>
+
+<p>stop-vm.bat</p>
+
+<pre class="highlight plaintext"><code>VBoxManage controlvm trusty64 savestate
+</code></pre>
+
+          <footer>
+      <ul class="large-column">
+        <li><h5 class="heading">Recent Articles</h5></li>
+        <li>
+          <ol>
+              <li><a href="/2015/02/07/developing-on-windows.html">Developing on Windows</a> <span>Feb  7</span></li>
+          </ol>
+        </li>
+      </ul>
+
+      <ul class="small-column">
+        <li><h5 class="heading">Tags</h5></li>
+        <li>
+        <ol>
+          <li><a href="/tags/development.html">development (1)</a></li>
+          <li><a href="/tags/windows.html">windows (1)</a></li>
+        </ol>
+      </li>
+    </ul>
+
+  </footer>
+
+    </div>
+
+ </body>
+</html>

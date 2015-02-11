@@ -5,20 +5,154 @@
   <id>http://blog.url.com/</id>
   <link href="http://blog.url.com/"/>
   <link href="http://blog.url.com/feed.xml" rel="self"/>
-  <updated>2012-01-01T00:00:00+00:00</updated>
+  <updated>2015-02-06T22:49:00-08:00</updated>
   <author>
     <name>Blog Author</name>
   </author>
   <entry>
-    <title>Example Article</title>
-    <link rel="alternate" href="http://blog.url.com/2012/01/01/example-article.html"/>
-    <id>http://blog.url.com/2012/01/01/example-article.html</id>
-    <published>2012-01-01T00:00:00+00:00</published>
-    <updated>2015-01-19T06:38:22+00:00</updated>
+    <title>Developing on Windows</title>
+    <link rel="alternate" href="http://blog.url.com/2015/02/07/developing-on-windows.html"/>
+    <id>http://blog.url.com/2015/02/07/developing-on-windows.html</id>
+    <published>2015-02-06T22:49:00-08:00</published>
+    <updated>2015-02-10T18:41:12-08:00</updated>
     <author>
       <name>Article Author</name>
     </author>
-    <content type="html">&lt;p&gt;This is an example article. You probably want to delete it and write your own articles!&lt;/p&gt;
+    <content type="html">&lt;p&gt;I've been living in the unix terminal world for the last couple of years and I much prefer it over the gui bloat of visual studio or eclipse. I ended up with a nice windows machine and I really wanted to make it work.&lt;/p&gt;
+
+&lt;p&gt;I went with a hybrid approach: use cygwin for a nice terminal with ssh and develop on a ubuntu vm.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h5 id="development-environment-checklist"&gt;Development environment checklist:&lt;/h5&gt;
+
+&lt;p&gt;Terminal&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;- 256 color tty
+- bash
+- tmux
+- ssh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Tools&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;- vim
+- git
+- ruby
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Cygwin was an obvious first solution but I soon found out that ruby, nodejs and vim had many issues that made it unusable for programming.&lt;/p&gt;
+
+&lt;p&gt;For a while I ran vagrant and everything was fine until I ssh-ed into the windows machine and started up vagrant. It got confused and creating new vms in c:\windows\system32\config\systemprofile and after every restart it would forget the vm, proceeding to create new ones. Vagrant went in the trash.&lt;/p&gt;
+
+&lt;p&gt;I kept cygwin for the terminal section of my checklist and ran virtualbox vm in headless mode for the tools.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h5 id="cygwin"&gt;Cygwin&lt;/h5&gt;
+
+&lt;p&gt;Download and install Cygwin with the recommended packages&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;https://cygwin.com/setup-x86.exe
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add cygwin\bin to path&lt;/p&gt;
+
+&lt;p&gt;Create a shortcut for mintty (end with - for login shell)&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;C:\cygwin\bin\mintty.exe bash -
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Get apt-cyg, the package manager.&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg &amp;gt; apt-cyg
+install apt-cyg /bin
+rm apt-cyg
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install essential packages&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;apt-cyg install wget git vim tmux
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Set up SSH (run mintty.exe as administrator)&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;ssh-host-config -y
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When prompted for CYGWIN enter &lt;code&gt;tty ntsec&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;When prompted to run under default user say no and enter your current user&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;chmod 600 /etc/ssh_host*key
+net start sshd
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add windows firewall rule to accept connections on port 22.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h5 id="vm"&gt;VM&lt;/h5&gt;
+
+&lt;p&gt;Next let's set up our actual development environment in form of a ubuntu server vm.&lt;/p&gt;
+
+&lt;p&gt;Install Virtualbox and download the latest ubuntu server iso.&lt;/p&gt;
+
+&lt;p&gt;We want to access the vm from the network and also share the host's network and vpn. To do this, we'll add another network interface to our vm.&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;eth0 -&amp;gt; NAT
+eth1 -&amp;gt; bridge
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Edit the network interfaces&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;sudo vim /etc/network/interfaces
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Change the interfaces to something similar:&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+      address 192.168.1.123
+      hetwork 192.168.1.0
+      netmask 255.255.255.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Fix Grub timeout&lt;/p&gt;
+
+&lt;p&gt;After a failed shutdown the vm gets stuck at the grub boot select screen. This is inconvenient when running the vm in headless mode.&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;sudo vim /etc/default/grub
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add this to the file:&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;GRUB_RECORDFAIL_TIMEOUT=2
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Update grub&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;sudo update-grub
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create two bat files to start and stop headless vm with VBoxManage. (trusty64 is the name of the vm)&lt;/p&gt;
+
+&lt;p&gt;start-vm.bat&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;VBoxManage startvm trusty64 --type headless
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;stop-vm.bat&lt;/p&gt;
+
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;VBoxManage controlvm trusty64 savestate
+&lt;/code&gt;&lt;/pre&gt;
 </content>
   </entry>
 </feed>
