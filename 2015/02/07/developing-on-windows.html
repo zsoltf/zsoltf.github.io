@@ -102,38 +102,16 @@
 </nav>
 
 
-      <p>I've been living in the unix terminal world for the last couple of years and I much prefer it over the gui bloat of visual studio or eclipse. I ended up with a nice windows machine and I really wanted to make it work.</p>
+      <p>Recently I started writing a lot of Ruby code. This was easy and everything was great until I tried doing it on Windows.
+I installed cygwin and got tmux, ssh and bash with a 256 color terminal to work, but Vim and ruby were another story.</p>
 
-<p>I went with a hybrid approach: use cygwin for a nice terminal with ssh and develop on a ubuntu vm.</p>
+<p>After spending a couple of weekends trying to get it to work, I gave up and set up a VM.</p>
 
-<hr />
+<p>I wanted a headless VM and the Windows host to be accessible from the outside.</p>
 
-<h5 id="development-environment-checklist">Development environment checklist:</h5>
-
-<p>Terminal</p>
-
-<pre class="highlight plaintext"><code>- 256 color tty
-- bash
-- tmux
-- ssh
-</code></pre>
-
-<p>Tools</p>
-
-<pre class="highlight plaintext"><code>- vim
-- git
-- ruby
-</code></pre>
+<p>The solution was to use Cygwin's ssh daemon to accept incoming connections, and set up port forwarding on the VM for ssh and other things.</p>
 
 <p></p>
-
-<hr />
-
-<p>Cygwin was an obvious first solution but I soon found out that ruby, nodejs and vim had many issues that made it unusable for programming.</p>
-
-<p>For a while I ran vagrant and everything was fine until I ssh-ed into the windows machine and started up vagrant. It got confused and creating new vms in c:\windows\system32\config\systemprofile and after every restart it would forget the vm, proceeding to create new ones. Vagrant went in the trash.</p>
-
-<p>I kept cygwin for the terminal section of my checklist and ran virtualbox vm in headless mode for the tools.</p>
 
 <hr />
 
@@ -186,28 +164,7 @@ net start sshd
 
 <p>Install Virtualbox and download the latest ubuntu server iso.</p>
 
-<p>We want to access the vm from the network and also share the host's network and vpn. To do this, we'll add another network interface to our vm.</p>
-
-<pre class="highlight plaintext"><code>eth0 -&gt; NAT
-eth1 -&gt; bridge
-</code></pre>
-
-<p>Edit the network interfaces</p>
-
-<pre class="highlight plaintext"><code>sudo vim /etc/network/interfaces
-</code></pre>
-
-<p>Change the interfaces to something similar:</p>
-
-<pre class="highlight plaintext"><code>auto eth0
-iface eth0 inet dhcp
-
-auto eth1
-iface eth1 inet static
-      address 192.168.1.123
-      hetwork 192.168.1.0
-      netmask 255.255.255.0
-</code></pre>
+<p>Use Port Forwarding for ssh, rails servers, middleman, etc</p>
 
 <p>Fix Grub timeout</p>
 
@@ -235,7 +192,7 @@ iface eth1 inet static
 
 <p>stop-vm.bat</p>
 
-<pre class="highlight plaintext"><code>VBoxManage controlvm trusty64 savestate
+<pre class="highlight plaintext"><code>VBoxManage controlvm trusty64 poweroff
 </code></pre>
 
           <footer>

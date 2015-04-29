@@ -14,42 +14,20 @@
     <link rel="alternate" href="http://blog.url.com/2015/02/07/developing-on-windows.html"/>
     <id>http://blog.url.com/2015/02/07/developing-on-windows.html</id>
     <published>2015-02-06T22:49:00-08:00</published>
-    <updated>2015-02-10T18:41:12-08:00</updated>
+    <updated>2015-04-28T18:39:10-07:00</updated>
     <author>
       <name>Article Author</name>
     </author>
-    <content type="html">&lt;p&gt;I've been living in the unix terminal world for the last couple of years and I much prefer it over the gui bloat of visual studio or eclipse. I ended up with a nice windows machine and I really wanted to make it work.&lt;/p&gt;
+    <content type="html">&lt;p&gt;Recently I started writing a lot of Ruby code. This was easy and everything was great until I tried doing it on Windows.
+I installed cygwin and got tmux, ssh and bash with a 256 color terminal to work, but Vim and ruby were another story.&lt;/p&gt;
 
-&lt;p&gt;I went with a hybrid approach: use cygwin for a nice terminal with ssh and develop on a ubuntu vm.&lt;/p&gt;
+&lt;p&gt;After spending a couple of weekends trying to get it to work, I gave up and set up a VM.&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;I wanted a headless VM and the Windows host to be accessible from the outside.&lt;/p&gt;
 
-&lt;h5 id="development-environment-checklist"&gt;Development environment checklist:&lt;/h5&gt;
-
-&lt;p&gt;Terminal&lt;/p&gt;
-
-&lt;pre class="highlight plaintext"&gt;&lt;code&gt;- 256 color tty
-- bash
-- tmux
-- ssh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Tools&lt;/p&gt;
-
-&lt;pre class="highlight plaintext"&gt;&lt;code&gt;- vim
-- git
-- ruby
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The solution was to use Cygwin's ssh daemon to accept incoming connections, and set up port forwarding on the VM for ssh and other things.&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Cygwin was an obvious first solution but I soon found out that ruby, nodejs and vim had many issues that made it unusable for programming.&lt;/p&gt;
-
-&lt;p&gt;For a while I ran vagrant and everything was fine until I ssh-ed into the windows machine and started up vagrant. It got confused and creating new vms in c:\windows\system32\config\systemprofile and after every restart it would forget the vm, proceeding to create new ones. Vagrant went in the trash.&lt;/p&gt;
-
-&lt;p&gt;I kept cygwin for the terminal section of my checklist and ran virtualbox vm in headless mode for the tools.&lt;/p&gt;
 
 &lt;hr /&gt;
 
@@ -102,28 +80,7 @@ net start sshd
 
 &lt;p&gt;Install Virtualbox and download the latest ubuntu server iso.&lt;/p&gt;
 
-&lt;p&gt;We want to access the vm from the network and also share the host's network and vpn. To do this, we'll add another network interface to our vm.&lt;/p&gt;
-
-&lt;pre class="highlight plaintext"&gt;&lt;code&gt;eth0 -&amp;gt; NAT
-eth1 -&amp;gt; bridge
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Edit the network interfaces&lt;/p&gt;
-
-&lt;pre class="highlight plaintext"&gt;&lt;code&gt;sudo vim /etc/network/interfaces
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Change the interfaces to something similar:&lt;/p&gt;
-
-&lt;pre class="highlight plaintext"&gt;&lt;code&gt;auto eth0
-iface eth0 inet dhcp
-
-auto eth1
-iface eth1 inet static
-      address 192.168.1.123
-      hetwork 192.168.1.0
-      netmask 255.255.255.0
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Use Port Forwarding for ssh, rails servers, middleman, etc&lt;/p&gt;
 
 &lt;p&gt;Fix Grub timeout&lt;/p&gt;
 
@@ -151,7 +108,7 @@ iface eth1 inet static
 
 &lt;p&gt;stop-vm.bat&lt;/p&gt;
 
-&lt;pre class="highlight plaintext"&gt;&lt;code&gt;VBoxManage controlvm trusty64 savestate
+&lt;pre class="highlight plaintext"&gt;&lt;code&gt;VBoxManage controlvm trusty64 poweroff
 &lt;/code&gt;&lt;/pre&gt;
 </content>
   </entry>
